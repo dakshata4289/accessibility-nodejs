@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Accessibility Report Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9fafc;
+      color: #222;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .form-section {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      height: fit-content;
+    }
+
+    .report-section {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      min-height: 600px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #1f2937;
+    }
+
+    h2 {
+      color: #374151;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    h3 {
+      color: #4b5563;
+      margin: 1rem 0 0.5rem 0;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+      color: #374151;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.3rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 0.7rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    button:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    #message {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-weight: 500;
+      min-height: 60px;
+    }
+
+    .success {
+      color: #059669;
+    }
+
+    .error {
+      color: #dc2626;
+    }
+
+    .loading {
+      color: #d97706;
+    }
+
+    /* Report Styles */
+    .score-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .score-number {
+      font-size: 3rem;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    .score-label {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .issues-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .issue-count {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 6px;
+      text-align: center;
+      border-left: 4px solid;
+    }
+
+    .issue-count.serious {
+      border-left-color: #dc2626;
+    }
+
+    .issue-count.moderate {
+      border-left-color: #d97706;
+    }
+
+    .issue-count.minor {
+      border-left-color: #059669;
+    }
+
+    .issue-count.critical {
+      border-left-color: #7c2d12;
+    }
+
+    .issue-count-number {
+      font-size: 1.5rem;
+      font-weight: bold;
+      display: block;
+    }
+
+    .page-list {
+      margin-top: 2rem;
+    }
+
+    .page-item {
+      background: #f8f9fa;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .page-item:hover {
+      background: #e5e7eb;
+    }
+
+    .page-item.active {
+      background: #dbeafe;
+      border-color: #3b82f6;
+    }
+
+    .page-url {
+      font-weight: bold;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+      word-break: break-all;
+    }
+
+    .page-issues {
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+
+    .issue-details {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .issue-item {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .issue-header {
+      display: flex;
+      justify-content: between;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+    }
+
+    .issue-impact {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      margin-right: 0.5rem;
+      text-transform: uppercase;
+    }
+
+    .impact-critical {
+      background: #fed7d7;
+      color: #c53030;
+    }
+
+    .impact-serious {
+      background: #fed7d7;
+      color: #c53030;
+    }
+
+    .impact-moderate {
+      background: #fed7aa;
+      color: #dd6b20;
+    }
+
+    .impact-minor {
+      background: #c6f6d5;
+      color: #276749;
+    }
+
+    .issue-id {
+      color: #6b7280;
+      font-family: monospace;
+      font-size: 0.9rem;
+      margin-left: auto;
+    }
+
+    .issue-description {
+      margin: 0.5rem 0;
+      color: #374151;
+      line-height: 1.5;
+    }
+
+    .issue-help {
+      font-weight: bold;
+      color: #1f2937;
+      margin: 0.75rem 0 0.5rem 0;
+    }
+
+    .issue-examples {
+      margin-top: 1rem;
+    }
+
+    .example-item {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 0.75rem;
+      border-left: 3px solid #d1d5db;
+    }
+
+    .example-snippet {
+      font-family: monospace;
+      font-size: 0.85rem;
+      background: #1f2937;
+      color: #e5e7eb;
+      padding: 0.75rem;
+      border-radius: 4px;
+      margin: 0.5rem 0;
+      overflow-x: auto;
+    }
+
+    .example-problem {
+      color: #dc2626;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      white-space: pre-line;
+      line-height: 1.4;
+    }
+
+    .resources {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .resource-link {
+      color: #2563eb;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .resource-link:hover {
+      text-decoration: underline;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .scan-info {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .scan-info p {
+      margin: 0.25rem 0;
+      color: #0369a1;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Accessibility Report Generator</h1>
+
+  <div class="container">
+    <div class="form-section">
+      <form id="emailForm">
+        <label for="email">Email:</label>
+        <input type="email" id="email" placeholder="you@example.com" required />
+
+        <label for="url">Website URL:</label>
+        <input type="url" id="url" placeholder="https://example.com" required />
+
+        <button type="submit" id="submitBtn">Generate & Send Report</button>
+      </form>
+
+      <div id="message"></div>
+    </div>
+
+    <div class="report-section">
+      <div id="reportContent" class="hidden">
+        <div class="scan-info">
+          <p><strong>Scanned URL:</strong> <span id="scannedUrl"></span></p>
+          <p><strong>Scan Date:</strong> <span id="scanDate"></span></p>
+          <p><strong>Scan ID:</strong> <span id="scanId"></span></p>
+        </div>
+
+        <div class="score-card">
+          <div class="score-number" id="overallScore">0%</div>
+          <div class="score-label">Accessibility Score</div>
+        </div>
+
+        <div class="issues-summary" id="issuesSummary">
+          <!-- Issues summary will be populated here -->
+        </div>
+
+        <h2>Scanned Pages</h2>
+        <div class="page-list" id="pageList">
+          <!-- Page list will be populated here -->
+        </div>
+
+        <div id="pageDetails">
+          <!-- Page details will be populated here -->
+        </div>
+      </div>
+
+      <div id="emptyState">
+        <div style="text-align: center; color: #6b7280; padding: 4rem 2rem;">
+          <h3>No Report Generated</h3>
+          <p>Enter a website URL and email to generate an accessibility report.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentReportData = null;
+
+    document.getElementById("emailForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value.trim();
+      const url = document.getElementById("url").value.trim();
+      const message = document.getElementById("message");
+      const submitBtn = document.getElementById("submitBtn");
+
+      if (!email || !url) {
+        showMessage("❌ Please fill in both fields.", "error");
+        return;
+      }
+
+      showMessage("🔍 Scanning website...", "loading");
+      submitBtn.disabled = true;
+
+      try {
+        // Step 1: Run scan
+        const scanRes = await fetch("/api/scan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url, user: email }),
+        });
+
+        if (!scanRes.ok) {
+          throw new Error(`Scan failed: ${scanRes.status} ${scanRes.statusText}`);
+        }
+
+        const scanData = await scanRes.json();
+
+        if (!scanData.success) {
+          throw new Error(scanData.error || "Scan failed");
+        }
+
+        // Display scan results immediately
+        console.log("Scan completed:", scanData);
+        currentReportData = scanData;
+        displayReport(scanData);
+        showMessage("✅ Scan completed! Report displayed.", "success");
+
+        // Step 2: Send email in background
+        showMessage("📨 Sending report via email...", "loading");
+
+        const sendRes = await fetch("/api/send-report", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            summarizedReport: scanData.summarizedReport,
+            summary: scanData.summary,
+            scannedWebsite: {
+              id: scanData.scannedWebsite.id,
+              url: scanData.scannedWebsite.url,
+              date: scanData.scannedWebsite.date,
+            },
+            audience: "developer",
+          }),
+        });
+
+        const sendData = await sendRes.json();
+        console.log("Email send response:", sendData);
+
+        if (sendData.success) {
+          showMessage("✅ Report sent successfully! Check your email.", "success");
+        } else {
+          console.error("Email sending failed:", sendData.error);
+          showMessage("⚠️ Report generated but email failed: " + (sendData.error || "Unknown error"), "error");
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        showMessage("⚠️ Error: " + err.message, "error");
+      }
+
+      submitBtn.disabled = false;
+    });
+
+    function showMessage(text, type = "") {
+      const message = document.getElementById("message");
+      message.textContent = text;
+      message.className = type;
+    }
+
+    function displayReport(reportData) {
+      // Show report section, hide empty state
+      document.getElementById('reportContent').classList.remove('hidden');
+      document.getElementById('emptyState').classList.add('hidden');
+
+      // Display scan info
+      document.getElementById('scannedUrl').textContent = reportData.scannedWebsite.url;
+      document.getElementById('scanDate').textContent = new Date(reportData.scannedWebsite.date).toLocaleString();
+      document.getElementById('scanId').textContent = reportData.scannedWebsite.id;
+
+      // Display overall score
+      document.getElementById('overallScore').textContent =
+        `${Math.round(reportData.summary.score)}%`;
+
+      // Display issues summary
+      displayIssuesSummary(reportData.summary);
+
+      // Display page list
+      displayPageList(reportData.summarizedReport);
+
+      // Show first page details by default
+      if (reportData.summarizedReport.length > 0) {
+        showPageDetails(0);
+      }
+    }
+
+    function displayIssuesSummary(summary) {
+      const issuesSummary = document.getElementById('issuesSummary');
+
+      issuesSummary.innerHTML = `
+        ${summary.critical ? `
+        <div class="issue-count critical">
+          <span class="issue-count-number">${summary.critical}</span>
+          Critical Issues
+        </div>
+        ` : ''}
+        <div class="issue-count serious">
+          <span class="issue-count-number">${summary.serious || 0}</span>
+          Serious Issues
+        </div>
+        <div class="issue-count moderate">
+          <span class="issue-count-number">${summary.moderate || 0}</span>
+          Moderate Issues
+        </div>
+        <div class="issue-count minor">
+          <span class="issue-count-number">${summary.minor || 0}</span>
+          Minor Issues
+        </div>
+        <div class="issue-count">
+          <span class="issue-count-number">${summary.totalIssues || 0}</span>
+          Total Issues
+        </div>
+      `;
+    }
+
+    function displayPageList(pages) {
+      const pageList = document.getElementById('pageList');
+
+      pageList.innerHTML = pages.map((page, index) => `
+        <div class="page-item" onclick="showPageDetails(${index})">
+          <div class="page-url">${page.url}</div>
+          <div class="page-issues">
+            ${page.issues?.length || 0} issues found
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function showPageDetails(pageIndex) {
+      const page = currentReportData.summarizedReport[pageIndex];
+      const pageDetails = document.getElementById('pageDetails');
+
+      // Update active page item
+      document.querySelectorAll('.page-item').forEach((item, index) => {
+        item.classList.toggle('active', index === pageIndex);
+      });
+
+      if (!page.issues || page.issues.length === 0) {
+        pageDetails.innerHTML = `
+          <div style="text-align: center; padding: 2rem; color: #059669;">
+            <h3>✅ No Accessibility Issues Found</h3>
+            <p>This page passed all accessibility checks.</p>
+          </div>
+        `;
+        return;
+      }
+
+      pageDetails.innerHTML = `
+        <h3>Issues on: ${page.url}</h3>
+        ${page.issues.map(issue => `
+          <div class="issue-item">
+            <div class="issue-header">
+              <span class="issue-impact impact-${issue.impact}">
+                ${issue.impact.toUpperCase()}
+              </span>
+              <span class="issue-id">${issue.id}</span>
+            </div>
+            
+            <div class="issue-help">${issue.help}</div>
+            <div class="issue-description">${issue.description}</div>
+            
+            ${issue.examples && issue.examples.length > 0 ? `
+              <div class="issue-examples">
+                <h4>Examples (${issue.examples.length}):</h4>
+                ${issue.examples.map(example => `
+                  <div class="example-item">
+                    <div><strong>Element:</strong></div>
+                    <div class="example-snippet">${escapeHtml(example.snippet)}</div>
+                    <div class="example-problem">${escapeHtml(example.problem)}</div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+            
+            ${issue.resources && issue.resources.length > 0 ? `
+              <div class="resources">
+                <h4>Resources:</h4>
+                ${issue.resources.map(resource => `
+                  <div>
+                    <a href="${resource}" target="_blank" class="resource-link">${resource}</a>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `).join('')}
+      `;
+    }
+
+    function escapeHtml(unsafe) {
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Initialize with empty state
+    document.getElementById('emptyState').classList.remove('hidden');
+    document.getElementById('reportContent').classList.add('hidden');
+  </script>
+</body>
+
+</html>
